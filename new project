@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="topContainer">
+      <form id="movieform" method="get">
+        <input type="text" id="search" />
+        <button type="submit">Search</button>
+      </form>
+      <button id="nightToggle">Night mode</button>
+    </div>
+    <select name="sorting" id="sort" >
+      <option value="">Sort Rating</option>
+      <option value="desc">Rating: High to Low</option>
+      <option value="asc">Rating: Low to High</option>
+    </select>
+    <div id="container"></div>
+    <script src="main.js"></script>
+  </body>
+</html>
+
+
+
+const form = document.getElementById("movieform");
+const movieContainer = document.getElementById("container");
+const nigthMode = document.getElementById("nightToggle");
+
+let movies = [];
+
+nigthMode.addEventListener("click",(e)=>{
+  document.body.classList.toggle("nightMode");
+  if(document.body.classList.contains("nightMode")){
+    nigthMode.innerText = "Day Mode";
+  }else{
+    nigthMode.innerText = "Night Mode";
+  }
+})
+
+const manipulateHtml = () => {
+  try {
+    for (let movie of movies) {
+      const div = document.createElement("div");
+      div.className = "movieContainer";
+      const img = document.createElement("img");
+      img.setAttribute("class","banner");
+      img.setAttribute("src", movie.show.image.original);
+      div.innerHTML = `<h4>${movie.show.rating.average}</h4><h2>${movie.show.name}</h2> ${movie.show.summary}`;
+      div.prepend(img);
+      movieContainer.append(div);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getMovies = async (search) => {
+  try {
+    const res = await fetch(`http://api.tvmaze.com/search/shows?q=${search}`);
+    const data = await res.json();
+    movies = data;
+    manipulateHtml();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  try {
+    console.log(e.target.children[0].value);
+    getMovies(e.target.children[0].value);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+
+.topContainer{
+  display: flex;
+  justify-content: space-between;
+}
+
+.nightMode{
+  background-color: #002233;
+}
+
+#container{
+  width: 90vw;
+  margin:  10px auto;
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 15px;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.movieContainer{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+  border-radius: 10px;
+  gap:2px;
+  padding: 5px;
+}
+
+.banner{
+  width: 100%;
+  border-radius: 10px;
+}
